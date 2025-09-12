@@ -14,10 +14,6 @@ class DataFetcher:
         ticker = yf.Ticker("^GDAXI")
         df_pandas = ticker.history(period=period, interval=interval)
         
-        print(f"DEBUG: Raw yfinance data shape: {df_pandas.shape}")
-        print(f"DEBUG: Raw volume range: {df_pandas['Volume'].min()} to {df_pandas['Volume'].max()}")
-        print(f"DEBUG: Raw columns: {list(df_pandas.columns)}")
-        
         df_polars = pl.from_pandas(df_pandas.reset_index())
         
         df_polars = df_polars.with_columns([
@@ -39,8 +35,6 @@ class DataFetcher:
             .otherwise(pl.col("volume"))
             .alias("volume")
         ])
-        
-        print(f"DEBUG: Final volume range after processing: {df_polars['volume'].min()} to {df_polars['volume'].max()}")
         
         self.cache.save_data(df_polars, "DAX", period, interval)
         return df_polars

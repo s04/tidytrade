@@ -21,8 +21,8 @@ A Streamlit application for analyzing DAX (German stock index) price action with
 
 2. **Configure API Key**
    ```bash
-   cp .env.example .env
-   # Edit .env and add your ANTHROPIC_API_KEY
+   cp .streamlit/secrets.toml.example .streamlit/secrets.toml
+   # Edit .streamlit/secrets.toml and add your ANTHROPIC_API_KEY
    ```
 
 3. **Run Application**
@@ -34,7 +34,8 @@ A Streamlit application for analyzing DAX (German stock index) price action with
 4. **Docker Deployment**
    ```bash
    docker build -t dax-reviewer .
-   docker run -p 8501:8501 --env-file .env dax-reviewer
+   # For deployment, configure secrets via platform environment variables
+   docker run -p 8501:8501 -e ANTHROPIC_API_KEY=your_key dax-reviewer
    ```
 
 ## Usage

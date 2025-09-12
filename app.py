@@ -21,21 +21,11 @@ def load_data(period, interval):
 
 @st.cache_data(ttl=3600)
 def calculate_volume_profile(df, session_type):
-    st.write(f"DEBUG: Calculating daily volume profiles for {session_type}")
-    st.write(f"DEBUG: Data shape: {df.shape}")
-    st.write(f"DEBUG: Volume range: {df['volume'].min():,.0f} to {df['volume'].max():,.0f}")
-    st.write(f"DEBUG: Price range: {df['low'].min():.2f} to {df['high'].max():.2f}")
-    
-    svp = SessionVolumeProfile(price_bins=30)  # Fewer bins for daily profiles
+    svp = SessionVolumeProfile(price_bins=30)
     daily_profiles = svp.calculate_daily_profiles(df)
-    
-    st.write(f"DEBUG: Calculated profiles for {len(daily_profiles)} days")
     return daily_profiles
 
 def create_candlestick_chart(df, daily_profiles):
-    # Debug logging
-    st.write(f"DEBUG: Daily profiles count: {len(daily_profiles)}")
-    
     fig = make_subplots(
         rows=2, cols=1,
         subplot_titles=("DAX Candlestick Chart with Daily Session Volume Profiles", "Volume Timeline"),
@@ -147,11 +137,16 @@ def main():
     if st.button("🔄 Refresh Data", type="primary"):
         st.cache_data.clear()
     
-    with st.spinner("Loading DAX data..."):
-        df = load_data(period, interval)
-    
-    if df.is_empty():
-        st.error("No data available for the selected parameters")
+    try:
+        with st.spinner("Loading DAX data..."):
+            df = load_data(period, interval)
+        
+        if df.is_empty():
+            st.error("No data available for the selected parameters")
+            return
+    except Exception as e:
+        st.error(f"Failed to load DAX data: {str(e)}")
+        st.info("Please try again or contact support if the issue persists.")
         return
     
     with st.spinner("Calculating volume profile..."):
@@ -223,7 +218,11 @@ Keep the analysis practical and actionable for traders.""",
                         st.error("No volume profile data available for analysis")
                 except Exception as e:
                     st.error(f"AI analysis failed: {str(e)}")
-                    st.info("Make sure to set your ANTHROPIC_API_KEY in the .env file")
+                    st.info("Make sure to set your ANTHROPIC_API_KEY in .streamlit/secrets.toml")
+    
+    # Footer
+    st.markdown("---")
+    st.markdown("*DAX Price Indicator Reviewer - Built with Streamlit, Polars, and Claude AI*")
 
 if __name__ == "__main__":
     main()

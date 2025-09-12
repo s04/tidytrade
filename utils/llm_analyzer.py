@@ -1,12 +1,19 @@
-import os
+import streamlit as st
 from anthropic import Anthropic
-from dotenv import load_dotenv
-
-load_dotenv()
 
 class LLMAnalyzer:
     def __init__(self):
-        self.client = Anthropic(api_key=os.getenv('ANTHROPIC_API_KEY'))
+        try:
+            api_key = st.secrets["ANTHROPIC_API_KEY"]
+        except KeyError:
+            # Fallback to environment variable for development
+            import os
+            api_key = os.getenv('ANTHROPIC_API_KEY')
+        
+        if not api_key:
+            raise ValueError("ANTHROPIC_API_KEY not found in secrets.toml or environment variables")
+        
+        self.client = Anthropic(api_key=api_key)
     
     def analyze_price_action(self, df, volume_profile_data, custom_prompt=None):
         summary = self._create_price_summary(df, volume_profile_data)
@@ -31,7 +38,7 @@ Keep the analysis practical and actionable for traders.
         
         try:
             response = self.client.messages.create(
-                model="claude-3-5-sonnet-20241022",
+                model="claude-sonnet-4-20250514",
                 max_tokens=1000,
                 messages=[{"role": "user", "content": prompt}]
             )
