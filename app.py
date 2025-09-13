@@ -254,7 +254,7 @@ def main():
         period = st.selectbox(
             "Timeframe",
             ["1d", "5d", "1mo"],
-            index=1
+            index=0
         )
     
     with col2:
