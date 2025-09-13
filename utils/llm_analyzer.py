@@ -15,8 +15,8 @@ class LLMAnalyzer:
         
         self.client = Anthropic(api_key=api_key)
     
-    def analyze_price_action(self, df, volume_profile_data, custom_prompt=None):
-        summary = self._create_price_summary(df, volume_profile_data)
+    def analyze_price_action(self, df, volume_profile_data, custom_prompt=None, annotation_data=None):
+        summary = self._create_price_summary(df, volume_profile_data, annotation_data)
         
         if custom_prompt:
             prompt = custom_prompt.format(summary=summary)
@@ -46,7 +46,7 @@ Keep the analysis practical and actionable for traders.
         except Exception as e:
             return f"Analysis unavailable: {str(e)}"
     
-    def _create_price_summary(self, df, volume_profile_data):
+    def _create_price_summary(self, df, volume_profile_data, annotation_data=None):
         latest = df.tail(1).to_dicts()[0]
         recent_data = df.tail(20)
         
@@ -82,6 +82,31 @@ VOLUME ANALYSIS:
 
 TECHNICAL CONTEXT:
 - Trading Range: {recent_data['low'].min():.2f} - {recent_data['high'].max():.2f}
-- Volatility: {volatility}
-"""
+- Volatility: {volatility}"""
+
+        # Add annotation data if available
+        if annotation_data:
+            if annotation_data.get('quartiles'):
+                summary += f"""
+
+VOLUME DISTRIBUTION QUARTILES:
+- MIN: €{annotation_data['quartiles']['min']['price']:.2f} | Volume: {annotation_data['quartiles']['min']['volume']:,.0f}
+- Q1: €{annotation_data['quartiles']['q1']['price']:.2f} | Volume: {annotation_data['quartiles']['q1']['volume']:,.0f}
+- Q3: €{annotation_data['quartiles']['q3']['price']:.2f} | Volume: {annotation_data['quartiles']['q3']['volume']:,.0f}
+- MAX: €{annotation_data['quartiles']['max']['price']:.2f} | Volume: {annotation_data['quartiles']['max']['volume']:,.0f}"""
+
+            if annotation_data.get('cliffs'):
+                summary += f"""
+
+VOLUME CLIFFS (Natural Breakpoints):"""
+                if annotation_data['cliffs'].get('upper'):
+                    summary += f"""
+- Upper Cliff: €{annotation_data['cliffs']['upper']['price']:.2f} | Volume: {annotation_data['cliffs']['upper']['volume']:,.0f}"""
+                if annotation_data['cliffs'].get('lower'):
+                    summary += f"""
+- Lower Cliff: €{annotation_data['cliffs']['lower']['price']:.2f} | Volume: {annotation_data['cliffs']['lower']['volume']:,.0f}"""
+                
+                summary += """
+Note: Volume cliffs represent natural breakpoints where volume concentration drops significantly from the POC area. These often act as key support/resistance levels based on actual trading activity rather than statistical calculations."""
+
         return summary
