@@ -10,7 +10,7 @@ from utils.indicators import SessionVolumeProfile
 from utils.llm_analyzer import LLMAnalyzer
 
 st.set_page_config(
-    page_title="DAX Price Indicator Reviewer",
+    page_title="AI Session Profile Monitor",
     page_icon="📈",
     layout="wide"
 )
@@ -233,8 +233,20 @@ def create_candlestick_chart(df, daily_profiles, show_poc_labels=True, show_quar
     return fig
 
 def main():
-    st.title("📈 DAX Price Indicator Reviewer")
+    st.title("📈 AI Session Profile Monitor")
     st.markdown("Real-time DAX analysis with Session Volume Profile and AI insights")
+    
+    # Instructions
+    with st.expander("📋 Quick Instructions", expanded=False):
+        st.markdown("""
+        **Getting Started:**
+        - ⚠️ **Try the AI at the bottom of the page!** Now with custom prompt support! ⚠️
+        - **Viewing Timeframe**: Select 5d for desktop, 1 day for mobile devices
+        - **Chart Navigation**: If chart moves accidentally, refresh the page to reset view
+        - **Labels**: Try enabling volume cliff or quartile labels
+        - **AI Analysis**: Selected annotation labels (POC, Quartiles, Volume Cliffs) are automatically included in AI analysis
+        - **Session Profiles**: Blue bars show volume distribution, yellow POC line shows highest volume price level
+        """)
     
     col1, col2, col3, col4 = st.columns(4)
     
@@ -403,7 +415,7 @@ Keep the analysis practical and actionable for traders.""",
     
     # Footer
     st.markdown("---")
-    st.markdown("*DAX Price Indicator Reviewer - Built with Streamlit, Polars, and Claude AI*")
+    st.markdown("*AI Session Profile Monitor - Built with Streamlit, Polars, and Claude AI*")
 
 if __name__ == "__main__":
     main()
